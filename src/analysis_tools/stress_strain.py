@@ -1,4 +1,7 @@
-from analysis_tools.image_analysis import *
+import matplotlib.pyplot as plt
+import numpy as np
+
+from analysis_tools.image_analysis import get_rod_borders
 
 # get rod border positions
 def get_positions(img_lst) :
@@ -35,7 +38,7 @@ def get_displacements_strains_forces(f_pos, r_pos, rigid_stop, w_gel, l_rod, end
             r_x_fit.append(x_plot[i])
             r_y_fit.append(r_d[i])
 
-    # get fitted displacements for rigid rod
+    # get fitted displacements for rigid rod, assumed to be linear
     r_slope, y_int = np.polyfit(r_x_fit, r_y_fit, deg=1)
     r_fit = np.multiply(x_plot, r_slope) + y_int
 
@@ -103,3 +106,17 @@ def get_displacements_strains_forces(f_pos, r_pos, rigid_stop, w_gel, l_rod, end
         }, 
         analysis_fig
     )
+
+# get 1 y-value per x-value
+def sort_unique_strain_stress(x,y) :
+    sort_idx = np.argsort(x)
+    sorted_x = x[sort_idx]; sorted_y = np.array(y)[sort_idx]
+
+    unique_x, unique_idx, counts = np.unique(sorted_x, return_index=True, return_counts=True)
+
+    # use the mean to get 1 y-value
+    unique_y = np.array([
+        np.mean(sorted_y[idx : idx + count])
+        for idx, count in zip(unique_idx, counts)
+    ])
+    return unique_x, unique_y
